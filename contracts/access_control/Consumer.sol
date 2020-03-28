@@ -1,7 +1,7 @@
-pragma solidity ^0.4.24;
+pragma solidity >=0.4.24;
 
 
-import "../../libraries/Roles.sol";
+import "../../libraries/UserRoles.sol";
 
 contract Consumer {
     using UserRoles for UserRoles.Role;

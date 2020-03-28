@@ -1,6 +1,6 @@
-pragma solidity ^0.4.24;
+pragma solidity >=0.4.24;
 
-import "../../libraries/Roles.sol";
+import "../../libraries/UserRoles.sol";
 
 contract Distributor {
     using UserRoles for UserRoles.Role;
