@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kigali Coffee Limited</title>
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <h1 style="text-align: center;">Kigali Coffee Limited</h1>
+      <hr />
+      <p style="text-align: center;">
+        Tracking coffee supply chain using the Ethereum blockchain.
+      </p>
+    </div>
+
+    <div id="ftc-harvest">
+      <h2>Role Management</h2>
+      <div class="form-group">
+        User Address
+        <br />
+        <input
+          type="text"
+          id="addressID"
+          name="roleaddress"
+          value=""
+          size="50"
+        /><br />
+        <div class="button-div">
+          <button class="add-farmer" id="button" type="button" data-id="1">
+            Add Farmer
+          </button>
+          <button class="add-distributor" id="button" type="button" data-id="2">
+            Add Distributor
+          </button>
+          <button class="add-retailer" id="button" type="button" data-id="3">
+            Add Retailer
+          </button>
+          <button class="add-consumer" id="button" type="button" data-id="4">
+            Add Consumer
+          </button>
+        </div>
+      </div>
+      <div class="form-break"></div>
+      <h2>Product Overview</h2>
+      <div class="form-group">
+        UPC
+        <br />
+        <input type="number" id="upc" name="upc" value="" />
+        <br />
+        Farm Name
+        <br />
+        <input
+          type="text"
+          id="originFarmName"
+          name="originFarmName"
+          value=""
+        /><br />
+        Farm Information
+        <br />
+        <input
+          type="text"
+          id="originFarmInformation"
+          name="originFarmInformation"
+          value=""
+        /><br />
+        Farm Latitude
+        <br />
+        <input
+          type="text"
+          id="originFarmLatitude"
+          name="originFarmLatitude"
+          value=""
+        /><br />
+        Farm Longitude
+        <br />
+        <input
+          type="text"
+          id="originFarmLongitude"
+          name="originFarmLongitude"
+          value=""
+        /><br />
+        <br />
+        Product Notes
+        <br />
+        <input
+          type="text"
+          id="productNotes"
+          name="productNotes"
+          value=""
+          size="60"
+        /><br />
+        <button class="btn-harvest" id="button" type="button" data-id="5">
+          Harvest
+        </button>
+        <button class="btn-process" id="button" type="button" data-id="6">
+          Process
+        </button>
+        <button class="btn-pack" id="button" type="button" data-id="7">
+          Pack
+        </button>
+        <button class="btn-trackOne" id="button" type="button" data-id="8">
+          Track Coffee 1
+        </button>
+        <button class="btn-trackTwo" id="button" type="button" data-id="9">
+          Track Coffee 2
+        </button>
+      </div>
+      <div id="trackone" style="display:none">
+        <ul>
+          <li id="ftc-sku" />
+          <li id="ftc-productupc" />
+          <li id="ftc-purchasingprice" />
+          <li id="ftc-stateis" />
+          <li id="ftc-sellingprice" />
+          <li id="ftc-farm" />
+          <li id="ftc-organizationinfo" />
+        </ul>
+        <hr />
+      </div>
+      <div id="tracktwo" style="display:none">
+        <ul>
+          <li id="ftc-lat" />
+          <li id="ftc-long" />
+          <li id="ftc-notes" />
+          <li id="ftc-farmer" />
+          <li id="ftc-buyer" />
+          <li id="ftc-retailer" />
+          <li id="ftc-consumer" />
+        </ul>
+        <hr />
+      </div>
+      <div class="form-break"></div>
+      <h2>Product Details</h2>
+      <div class="form-group">
+        Coffee Selling Price
+        <br />
+        <input type="number" id="productPrice" name="productPrice" value=>ETH<br />
+        <button class="btn-advertise" id="button" type="button" data-id="10">
+          Advertise
+        </button>
+        <button class="btn-buy" id="button" type="button" data-id="11">
+          Buy
+        </button>
+        <button class="btn-ship" id="button" type="button" data-id="12">
+          Ship
+        </button>
+        <button class="btn-receive" id="button" type="button" data-id="13">
+          Receive
+        </button>
+        <button class="btn-purchase" id="button" type="button" data-id="14">
+          Purchase
+        </button>
+      </div>
+      <div class="form-break"></div>
+      <hr />
+    </div>
+
+    <h2>Transaction History<span id="ftc-history"></span></h2>
+    <div>
+      <ul id="ftc-events">
+        <!-- Events will appear here from app.js -->
+      </ul>
+      <br />
+      <hr />
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- <script src="js/web3.min.js"></script> -->
+    <script src="js/truffle-contract.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

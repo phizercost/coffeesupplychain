@@ -4,6 +4,7 @@
   "description": "Coffee Supply Chain",
   "main": "index.js",
   "scripts": {
+    "dev": "lite-server",
     "test": "mocha"
   },
   "author": "Phizer Dusabuwera",
@@ -12,5 +13,8 @@
     "ganache-cli": "^6.9.1",
     "mocha": "^7.1.1",
     "truffle-hdwallet-provider": "^1.0.17"
+  },
+  "devDependencies": {
+    "lite-server": "2.4.0"
   }
 }

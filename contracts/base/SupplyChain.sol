@@ -6,6 +6,7 @@ import "../access_control/Retailer.sol";
 import "../access_control/Consumer.sol";
 import "../core/Ownable.sol";
 
+
 contract SupplyChain is Ownable, Farmer, Distributor, Retailer, Consumer {
     uint256 skuCount;
     enum State {
@@ -28,8 +29,7 @@ contract SupplyChain is Ownable, Farmer, Distributor, Retailer, Consumer {
         uint256 sellingPrice;
         uint256 purchasingPrice;
         State state;
-        string productUpc;
-        string originationInformation;
+        uint256 productUpc;
         string farm;
         string organizationInfo;
         Coordinates coordinates;
@@ -40,14 +40,14 @@ contract SupplyChain is Ownable, Farmer, Distributor, Retailer, Consumer {
         address consumer;
     }
     mapping(uint256 => CoffeeLot) coffeeLots;
-    event Harvested(uint256 skuCount);
-    event Processed(uint256 sku);
-    event Packed(uint256 sku);
-    event Advertised(uint256 sku);
-    event Bought(uint256 sku);
-    event Shipped(uint256 sku);
-    event Received(uint256 sku);
-    event Purchased(uint256 sku);
+    event Harvested(uint256 upc);
+    event Processed(uint256 upc);
+    event Packed(uint256 upc);
+    event Advertised(uint256 upc);
+    event Bought(uint256 upc);
+    event Shipped(uint256 upc);
+    event Received(uint256 upc);
+    event Purchased(uint256 upc);
     modifier verifyCaller(address _address) {
         require(
             msg.sender == _address,
@@ -59,77 +59,78 @@ contract SupplyChain is Ownable, Farmer, Distributor, Retailer, Consumer {
         require(msg.value >= _price, "Have not paid enough");
         _;
     }
-    modifier readyForProcessing(uint256 _sku) {
+    modifier readyForProcessing(uint256 _upc) {
         require(
-            coffeeLots[_sku].state == State.Harvested,
+            coffeeLots[_upc].state == State.Harvested,
             "Not ready for processing"
         );
         _;
     }
-    modifier readyForPacking(uint256 _sku) {
+    modifier readyForPacking(uint256 _upc) {
         require(
-            coffeeLots[_sku].state == State.Processed,
+            coffeeLots[_upc].state == State.Processed,
             "Not ready for packing"
         );
         _;
     }
-    modifier readyForAdvertising(uint256 _sku) {
+    modifier readyForAdvertising(uint256 _upc) {
         require(
-            coffeeLots[_sku].state == State.Packed,
+            coffeeLots[_upc].state == State.Packed,
             "Not ready for advertising"
         );
         _;
     }
-    modifier readyForBuying(uint256 _sku) {
+    modifier readyForBuying(uint256 _upc) {
         require(
-            coffeeLots[_sku].state == State.Advertised,
+            coffeeLots[_upc].state == State.Advertised,
             "Not ready for buying"
         );
         _;
     }
-    modifier readyForShipping(uint256 _sku) {
+    modifier readyForShipping(uint256 _upc) {
         require(
-            coffeeLots[_sku].state == State.Bought,
+            coffeeLots[_upc].state == State.Bought,
             "Not ready for shipping"
         );
         _;
     }
-    modifier readyForReceiving(uint256 _sku) {
+    modifier readyForReceiving(uint256 _upc) {
         require(
-            coffeeLots[_sku].state == State.Shipped,
+            coffeeLots[_upc].state == State.Shipped,
             "Not ready for receiving"
         );
         _;
     }
-    modifier readyForPurchasing(uint256 _sku) {
+    modifier readyForPurchasing(uint256 _upc) {
         require(
-            coffeeLots[_sku].state == State.Received,
+            coffeeLots[_upc].state == State.Received,
             "Not ready for purchasing"
         );
         _;
     }
-    modifier checkValue(uint256 _sku, uint256 _checkType) {
+    modifier checkValue(uint256 _upc, uint256 _checkType) {
         _;
         uint256 _price;
         if (_checkType == 1) {
-            _price = coffeeLots[_sku].sellingPrice;
+            _price = coffeeLots[_upc].sellingPrice;
         } else {
-            _price = coffeeLots[_sku].purchasingPrice;
+            _price = coffeeLots[_upc].purchasingPrice;
         }
         uint256 amountToRefund = msg.value - _price;
         if (_checkType == 1) {
-            coffeeLots[_sku].buyer.transfer(amountToRefund);
+            coffeeLots[_upc].buyer.transfer(amountToRefund);
         } else {
-            coffeeLots[_sku].consumer.transfer(amountToRefund);
+            coffeeLots[_upc].consumer.transfer(amountToRefund);
         }
     }
+
     constructor() public payable {
         origOwner = msg.sender;
         skuCount = 0;
     }
+
     function harvestCoffee(
-        string _productUpc,
-        string _originationInformation,
+        uint256 _productUpc,
         string _farm,
         string _organizationInfo,
         string _longitude,
@@ -145,13 +146,12 @@ contract SupplyChain is Ownable, Farmer, Distributor, Retailer, Consumer {
             lat: _latitude,
             long: _longitude
         });
-        coffeeLots[skuCount] = CoffeeLot({
+        coffeeLots[_productUpc] = CoffeeLot({
             sku: skuCount,
             sellingPrice: 0,
             purchasingPrice: 0,
             state: State.Harvested,
             productUpc: _productUpc,
-            originationInformation: _originationInformation,
             farm: _farm,
             organizationInfo: _organizationInfo,
             coordinates: _coordinates,
@@ -161,87 +161,94 @@ contract SupplyChain is Ownable, Farmer, Distributor, Retailer, Consumer {
             retailer: 0,
             consumer: 0
         });
+    }
 
-    }
-    function processCoffee(uint256 sku)
+    function processCoffee(uint256 upc)
         public
         onlyFarmer
-        readyForProcessing(sku)
-        verifyCaller(coffeeLots[sku].farmer)
+        readyForProcessing(upc)
+        verifyCaller(coffeeLots[upc].farmer)
     {
-        coffeeLots[sku].state = State.Processed;
-        emit Processed(sku);
+        coffeeLots[upc].state = State.Processed;
+        emit Processed(upc);
     }
-    function packCoffee(uint256 sku)
+
+    function packCoffee(uint256 upc)
         public
         onlyFarmer
-        readyForPacking(sku)
-        verifyCaller(coffeeLots[sku].farmer)
+        readyForPacking(upc)
+        verifyCaller(coffeeLots[upc].farmer)
     {
-        coffeeLots[sku].state = State.Packed;
-        emit Packed(sku);
+        coffeeLots[upc].state = State.Packed;
+        emit Packed(upc);
     }
-    function advertiseCoffee(uint256 sku, uint256 sellingPrice)
+
+    function advertiseCoffee(uint256 upc, uint256 sellingPrice)
         public
         onlyFarmer
-        readyForAdvertising(sku)
-        verifyCaller(coffeeLots[sku].farmer)
+        readyForAdvertising(upc)
+        verifyCaller(coffeeLots[upc].farmer)
     {
-        coffeeLots[sku].sellingPrice = sellingPrice;
-        coffeeLots[sku].state = State.Advertised;
-        emit Advertised(sku);
+        coffeeLots[upc].sellingPrice = sellingPrice;
+        coffeeLots[upc].state = State.Advertised;
+        emit Advertised(upc);
     }
-    function buyCoffee(uint256 sku, uint256 consumerPriceToSet)
+
+    function buyCoffee(uint256 upc, uint256 consumerPriceToSet)
         public
         payable
         onlyDistributor
-        readyForBuying(sku)
-        paidEnough(coffeeLots[sku].sellingPrice)
-        checkValue(sku, 1)
+        readyForBuying(upc)
+        paidEnough(coffeeLots[upc].sellingPrice)
+        checkValue(upc, 1)
     {
         address buyer = msg.sender;
-        uint256 price = coffeeLots[sku].sellingPrice;
-        coffeeLots[sku].buyer = buyer;
-        coffeeLots[sku].purchasingPrice = consumerPriceToSet;
-        coffeeLots[sku].state = State.Bought;
-        coffeeLots[sku].farmer.transfer(price);
-        emit Bought(sku);
+        uint256 price = coffeeLots[upc].sellingPrice;
+        coffeeLots[upc].buyer = buyer;
+        coffeeLots[upc].purchasingPrice = consumerPriceToSet;
+        coffeeLots[upc].state = State.Bought;
+        coffeeLots[upc].farmer.transfer(price);
+        emit Bought(upc);
     }
-    function shipCoffee(uint256 sku)
+
+    function shipCoffee(uint256 upc)
         public
         onlyFarmer
-        readyForShipping(sku)
-        verifyCaller(coffeeLots[sku].farmer)
+        readyForShipping(upc)
+        verifyCaller(coffeeLots[upc].farmer)
     {
-        coffeeLots[sku].state = State.Shipped;
-        emit Shipped(sku);
+        coffeeLots[upc].state = State.Shipped;
+        emit Shipped(upc);
     }
-    function receiveCoffee(uint256 sku)
+
+    function receiveCoffee(uint256 upc)
         public
         onlyRetailer
-        readyForReceiving(sku)
+        readyForReceiving(upc)
     {
         address retailer = msg.sender;
-        coffeeLots[sku].retailer = retailer;
-        coffeeLots[sku].state = State.Received;
-        emit Received(sku);
+        coffeeLots[upc].retailer = retailer;
+        coffeeLots[upc].state = State.Received;
+        emit Received(upc);
     }
-    function purchaseCoffee(uint256 sku)
+
+    function purchaseCoffee(uint256 upc)
         public
         payable
         onlyConsumer
-        readyForPurchasing(sku)
-        paidEnough(coffeeLots[sku].purchasingPrice)
-        checkValue(sku, 0)
+        readyForPurchasing(upc)
+        paidEnough(coffeeLots[upc].purchasingPrice)
+        checkValue(upc, 0)
     {
         address consumer = msg.sender;
-        uint256 purchasingPrice = coffeeLots[sku].purchasingPrice;
-        coffeeLots[sku].consumer = consumer;
-        coffeeLots[sku].state = State.Purchased;
-        coffeeLots[sku].buyer.transfer(purchasingPrice);
-        emit Purchased(sku);
+        uint256 purchasingPrice = coffeeLots[upc].purchasingPrice;
+        coffeeLots[upc].consumer = consumer;
+        coffeeLots[upc].state = State.Purchased;
+        coffeeLots[upc].buyer.transfer(purchasingPrice);
+        emit Purchased(upc);
     }
-    function trackCoffeeBufferOne(uint256 _sku)
+
+    function trackCoffeeBufferOne(uint256 _upc)
         public
         view
         returns (
@@ -249,17 +256,16 @@ contract SupplyChain is Ownable, Farmer, Distributor, Retailer, Consumer {
             uint256 sellingPrice,
             uint256 purchasingPrice,
             string stateIs,
-            string productUpc,
-            string originationInformation,
+            uint256 productUpc,
             string farm,
             string organizationInfo
         )
     {
-        sku = coffeeLots[_sku].sku;
+        sku = coffeeLots[_upc].sku;
         uint256 state;
-        sellingPrice = coffeeLots[_sku].sellingPrice;
-        purchasingPrice = coffeeLots[_sku].purchasingPrice;
-        state = uint256(coffeeLots[_sku].state);
+        sellingPrice = coffeeLots[_upc].sellingPrice;
+        purchasingPrice = coffeeLots[_upc].purchasingPrice;
+        state = uint256(coffeeLots[_upc].state);
         if (state == 1) {
             stateIs = "Harvested";
         }
@@ -284,12 +290,22 @@ contract SupplyChain is Ownable, Farmer, Distributor, Retailer, Consumer {
         if (state == 8) {
             stateIs = "Purchased";
         }
-        productUpc = coffeeLots[_sku].productUpc;
-        originationInformation = coffeeLots[_sku].originationInformation;
-        farm = coffeeLots[_sku].farm;
-        organizationInfo = coffeeLots[_sku].organizationInfo;
+        productUpc = coffeeLots[_upc].productUpc;
+        farm = coffeeLots[_upc].farm;
+        organizationInfo = coffeeLots[_upc].organizationInfo;
+
+        return (
+            sku,
+            sellingPrice,
+            purchasingPrice,
+            stateIs,
+            productUpc,
+            farm,
+            organizationInfo
+        );
     }
-    function trackCoffeeBufferTwo(uint256 _sku)
+
+    function trackCoffeeBufferTwo(uint256 _upc)
         public
         view
         returns (
@@ -303,13 +319,14 @@ contract SupplyChain is Ownable, Farmer, Distributor, Retailer, Consumer {
             address consumer
         )
     {
-        sku = coffeeLots[_sku].sku;
-        lat = string(coffeeLots[_sku].coordinates.lat);
-        long = string(coffeeLots[_sku].coordinates.long);
-        notes = coffeeLots[_sku].notes;
-        farmer = coffeeLots[_sku].farmer;
-        buyer = coffeeLots[_sku].buyer;
-        retailer = coffeeLots[_sku].retailer;
-        consumer = coffeeLots[_sku].consumer;
+        sku = coffeeLots[_upc].sku;
+        lat = string(coffeeLots[_upc].coordinates.lat);
+        long = string(coffeeLots[_upc].coordinates.long);
+        notes = coffeeLots[_upc].notes;
+        farmer = coffeeLots[_upc].farmer;
+        buyer = coffeeLots[_upc].buyer;
+        retailer = coffeeLots[_upc].retailer;
+        consumer = coffeeLots[_upc].consumer;
+        return (sku, lat, long, notes, farmer, buyer, retailer, consumer);
     }
 }
