@@ -10,7 +10,6 @@
   "author": "Phizer Dusabuwera",
   "license": "ISC",
   "dependencies": {
-    "ganache-cli": "^6.9.1",
     "mocha": "^7.1.1",
     "truffle-hdwallet-provider": "^1.0.17"
   },
